@@ -1,21 +1,21 @@
 <template>
-      <div class="requests-item">
-        <small class="requests-item__number" :key="request.id">ID Заявки{{request.id}}</small>
-        <p class="requests-item__message">{{request.message}}</p>
-        <div class="requests-comments">
-          <small v-if='request.comments.length != 0' class="text-muted">//Комментарии</small>
-          <p class="requests-comments__message" v-for="(comment, index) of request.comments" :key="index">{{comment}}</p>
-        </div>
-        <div class="d-flex" v-if="this.$store.getters.user.admin">
-          <input v-model='commentMessage' name="commentMessage" type="text" class="form-control form-control-sm" placeholder="Введите комментарий">
-          <button type="button" @click="onAddComment" class="btn btn-sm btn-primary ml-1">Отправить</button>
-        </div>
-      </div>
- 
+  <div class="requests-item">
+    <small class="requests-item__number" :key="request.id">ID Заявки{{request.id}}</small>
+    <p class="requests-item__message">{{request.message}}</p>
+    <div class="requests-comments">
+      <small v-if='request.comments.length != 0' class="text-muted">//Комментарии</small>
+      <p class="requests-comments__message" v-for="(comment, index) of request.comments" :key="index">{{comment}}</p>
+    </div>
+    <div class="d-flex" v-if="isAdmin">
+      <input v-model='commentMessage' name="commentMessage" type="text" class="form-control form-control-sm" placeholder="Введите комментарий">
+      <button type="button" @click="onAddComment" class="btn btn-sm btn-primary ml-1">Отправить</button>
+    </div>
+  </div>
 </template>
 
-
 <script>
+  import {mapGetters} from 'vuex'
+  
   export default {
     data() {
       return {
@@ -30,22 +30,19 @@
             message: this.commentMessage,
             id: this.request.id
           })
-          this.commentMessage = '';          
+          this.commentMessage = '';
         }
       }
-    }    
+    },
+    computed: {
+      ...mapGetters([
+        'isAdmin'
+      ])
+    }
   }
 </script>
 
 <style lang="scss" scoped>
-  @mixin flex-center {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-  }
-
-  $color-main: #3545a6;
-
   .content-wrapper {
     display: grid;
     grid-template-columns: auto 1fr;
@@ -105,9 +102,10 @@
       width: 100%;
     }
 
-    &__tabs {      
+    &__tabs {
       border-bottom: 1px solid #ccc;
-      @media(max-width: 420px){
+
+      @media(max-width: 420px) {
         display: flex;
         flex-direction: column;
         align-items: center;
@@ -122,7 +120,7 @@
       padding: 10px 15px;
       margin-bottom: -1px;
       outline: none;
-      position: relative;      
+      position: relative;
 
       &--active {
         border-bottom: 3px solid #3f51b5;
@@ -137,7 +135,7 @@
 
   .requests-item {
     padding: 15px 10px;
-    border-bottom: 1px solid #ccc; 
+    border-bottom: 1px solid #ccc;
 
     &__number {
       color: #bbb;
@@ -148,9 +146,11 @@
       font-size: 16px;
     }
   }
-  .requests-comments{
+
+  .requests-comments {
     text-align: right;
-    &__message{
+
+    &__message {
       display: block;
       font-size: 14px;
       color: #333;

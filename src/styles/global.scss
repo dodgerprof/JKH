@@ -11,11 +11,11 @@ $color-additinal: #fff;
   border: 0;
   clip: rect(0 0 0 0)
 }
-  
+
 .page-wrapper {
   display: flex;
   flex-direction: column;
-  flex-wrap: wrap;  
+  flex-wrap: wrap;
   min-height: 100vh;
   padding: 0;
   margin: 0;
@@ -28,7 +28,7 @@ $color-additinal: #fff;
   }
 }
 
-.form{
+.form {
   width: 100%;
 }
 
@@ -40,38 +40,43 @@ $color-additinal: #fff;
   padding: 40px 20px;
   background-color: $color-additinal;
   width: auto;
-  &--center-item{
+
+  &--center-item {
     align-items: center;
-  } 
-  &__logo{
+  }
+
+  &__logo {
     margin-bottom: 40px;
   }
 }
 
 .logo {
-  width: 150px;  
+  width: 150px;
   height: 74px;
   display: flex;
   align-items: center;
   justify-content: center;
   border-bottom: 3px solid $color-main;
   border-top: 3px solid $color-main;
-  &__image{
+
+  &__image {
     fill: $color-main;
     margin-right: 10px;
   }
-  &__title{
+
+  &__title {
     color: $color-main;
     text-transform: uppercase;
     font-weight: bold;
   }
-  &--white{
-    .logo__image{
+
+  &--white {
+    .logo__image {
       fill: $color-additinal;
     }
-    .logo__title{
+
+    .logo__title {
       color: $color-additinal;
     }
   }
 }
-

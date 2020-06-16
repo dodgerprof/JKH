@@ -4,10 +4,6 @@ import VueRouter from 'vue-router'
 import login from '@/views/login.vue'
 import registration from '@/views/registration.vue'
 import profile from '@/views/profile.vue'
-import * as firebase from "firebase/app";
-import autoGuard from './auth-guard.js'
-
-
 
 Vue.use(VueRouter)
 
@@ -26,7 +22,9 @@ const routes = [
     path: '/profile',
     name: 'profile',
     component: profile,
-    beforeEnter: autoGuard
+    meta: {
+      requiresAuth: true
+    }
   }
   ]
 
@@ -35,5 +33,12 @@ const router = new VueRouter({
   mode: 'history'
 })
 
-export default router
+router.beforeEach((to, from, next) => {
+  const loggedIn = localStorage.getItem('user')
+  if (to.matched.some(record => record.meta.requiresAuth) && !loggedIn) {
+    next('/')
+  }
+  next()
+})
 
+export default router

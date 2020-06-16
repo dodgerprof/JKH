@@ -1,79 +1,68 @@
 import * as fb from 'firebase'
-
-class User {
-  constructor (id, isAdmin = false) {
-    this.id = id;
-    this.admin = isAdmin;
-  }
-}
+import axios from 'axios'
 
 export default {
   state: {
     user: null
   },
   mutations: {
-    setUser (state, payload) {
-      state.user = payload
+    setUser(state, userData) {
+      state.user = userData
+      localStorage.setItem('user', JSON.stringify(userData))
+      axios.defaults.headers.common['Authorization'] = `Bearer ${
+      userData.idToken
+    }`
     },
-    setAdmin(state, adminId){
-      if (state.user.id === adminId)
-        state.user.admin = true
+    clearUser(state) {
+      localStorage.removeItem('user')
+      location.reload()
     }
   },
   actions: {
-    async registerUser ({commit}, {email, password}) {
+    async registerUser({commit}, payload) {
       commit('setLoading', true)
+      payload['returnSecureToken'] = true;
       try {
-        const user = await fb.auth().createUserWithEmailAndPassword(email, password)
-        //Обращение которое сохраняется в user(↑) возвращает undefined при обращении к uid
-        //Приходится вызывать метод ↓ и у него забирать uid
-        fb.auth().onAuthStateChanged(userId => {          
-            commit('setUser', new User(userId.uid))
-         })   
-        
-        const adminId = await fb.database().ref('rang').once('value')
-        commit('setAdmin', adminId.val().id)
+        const adminId = await fb.database().ref('rang').once('value');
+        await axios.post('https://identitytoolkit.googleapis.com/v1/accounts:signUp?key=AIzaSyCuYE3igktWj1yn3OQz-TiUz-GrLtaHXm4', payload)
+          .then(({data}) => {
+              data['isAdmin'] = data.localId === adminId.val().id;
+              commit('setUser', data)
+            })
         commit('setLoading', false)
       } catch (error) {
         commit('setLoading', false)
-        commit('setError', error.message)
         throw error
       }
     },
-    async loginUser ({commit}, {email, password}) {      
+    async loginUser({commit}, payload) {
       commit('setLoading', true)
       try {
-        const user = await fb.auth().signInWithEmailAndPassword(email, password)
-        //Обращение которое сохраняется в user(↑) возвращает undefined при обращении к uid
-        //Приходится вызывать метод ↓ и у него забирать uid
-        fb.auth().onAuthStateChanged(userId => {          
-            commit('setUser', new User(userId.uid))
-         })
-        
         const adminId = await fb.database().ref('rang').once('value')
-        commit('setAdmin', adminId.val().id)
-        commit('setAdmin', true)
+        await axios.post('https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=AIzaSyCuYE3igktWj1yn3OQz-TiUz-GrLtaHXm4', payload)
+          .then(({data}) => {
+              data['isAdmin'] = data.localId === adminId.val().id;
+              commit('setUser', data)
+            })
         commit('setLoading', false)
       } catch (error) {
         commit('setLoading', false)
-        commit('setError', error.message)
         throw error
       }
     },
-    autoLoginUser ({commit}, payload) {
-      commit('setUser', new User(payload.uid))
-    },
-    logoutUser ({commit}) {
-      fb.auth().signOut()
-      commit('setUser', null)
+    logoutUser({commit}) {
+      commit('clearUser')
     }
   },
   getters: {
-    user (state) {
+    user(state) {
       return state.user
     },
-    isUserLoggedIn (state) {
-      return state.user !== null
+    isAdmin(state) {
+      return state.user.isAdmin
+    },
+    loggedIn(state) {
+      return !!state.user
     }
   }
 }

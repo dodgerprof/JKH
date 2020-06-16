@@ -1,5 +1,5 @@
 import Vue from 'vue'
-import Vuex from 'vuex' 
+import Vuex from 'vuex'
 
 import requests from './modules/requests'
 import user from './modules/user'
@@ -11,7 +11,7 @@ export default new Vuex.Store({
   state: {},
   mutations: {},
   actions: {},
-  modules: { 
+  modules: {
     user,
     requests,
     common

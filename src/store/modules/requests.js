@@ -1,25 +1,26 @@
 import * as firebase from 'firebase'
 
-class Request{
-  constructor(message, ownerId, comments = [], id = null){
-    this.message = message;    
+class Request {
+  constructor(message, ownerId, comments = [], id = null) {
+    this.message = message;
     this.ownerId = ownerId;
-    this.comments = comments; 
+    this.comments = comments;
     this.id = id;
   }
-  
 }
-
 
 export default {
   state: {
     requests: []
   },
-  mutations:{
-    loadRequest(state, payload){
+  mutations: {
+    loadRequest(state, payload) {
       state.requests = payload;
     },
-    updateRequest(state, {message, id}){
+    updateRequest(state, {
+      message,
+      id
+    }) {
       const request = state.requests.find(request => {
         return request.id === id
       })
@@ -27,20 +28,19 @@ export default {
     }
   },
   actions: {
-    async createRequest ({commit, getters}, payload){
+    async createRequest({commit,getters}, payload) {
       commit('setLoading', true)
-      try{
+      try {
         const newRequest = new Request(
           payload,
-          getters.user.id,
-          []
+          getters.user.localId
         )
         const request = await firebase.database().ref('requests').push(newRequest)
         commit('setLoading', false)
-      } catch(error){        
+      } catch (error) {
         console.log(error);
         commit('setLoading', false)
-      }      
+      }
     },
     async fetchRequests({commit}, payload) {
       commit('setLoading', true)
@@ -51,38 +51,42 @@ export default {
           const requests = requestsVal.val();
           Object.keys(requests).forEach(key => {
             const request = requests[key]
+            let comments = request.comments ? Object.values(request.comments) : []
             resultRequests.push(
               new Request(
                 request.message,
                 request.ownerId,
-                request.comments,
-                key))
+                comments,
+                key
+              ))
           })
           commit('loadRequest', resultRequests)
-          }
-          commit('setLoading', false)        
+        }
+        commit('setLoading', false)
       } catch (error) {
         console.log(error);
-        commit('setError', false)
         throw error
       }
     },
-   async addComment({commit}, {message, id}){
-      try{
-        await firebase.database().ref('requests').child(id).child('comments').push(message);  
-        commit('updateRequest', {message, id})
-      } catch(error){
+    async addComment({commit}, {message,id}) {
+      try {
+        await firebase.database().ref('requests').child(id).child('comments').push(message);
+        commit('updateRequest', {
+          message,
+          id
+        })
+      } catch (error) {
         console.log(error);
       }
     }
   },
   getters: {
-    requestsUser (state, getters){
-      return state.requests.filter((request) =>{
-      return  request.ownerId === getters.user.id
-      })
-    },
-    requestsAll (state, getters){
+    requests(state, getters) {
+      if (!getters.user.isAdmin) {
+        return state.requests.filter((request) => {
+          return request.ownerId === getters.user.localId
+        })
+      }
       return state.requests
     }
   }

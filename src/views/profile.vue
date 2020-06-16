@@ -13,7 +13,7 @@
             <h3 class="profile__name">johnny depp</h3>
             <span class="profile__rang">Пользователь</span>
             <p class="profile__about-user">Hi! I'm Adrian the Senior UI Designer at AmazingSurge. We hope you enjoy the design and quality of Social.</p>
-            <button  v-if="!isAdmin" @click="isOpenedModal = true" type="button" class="btn btn-outline-primary">Оставить заявку</button>
+            <button v-if="!isAdmin" @click="isOpenedModal = true" type="button" class="btn btn-outline-primary">Оставить заявку</button>
           </div>
         </div>
         <div class="requests">
@@ -25,14 +25,11 @@
               <a class="requests__tab" type="button">Голосование</a>
               <a class="requests__tab" type="button">Сообщения</a>
             </div>
-            <requestComponent 
-            v-for="request of requests" 
-            :request="request" />
+            <requestComponent v-for="request of requests" :request="request" />
           </div>
         </div>
       </main>
     </div>
-
   </div>
 </template>
 
@@ -41,7 +38,8 @@
   import addRequest from '@/components/addRequest.vue'
   import siteMenu from '@/components/site-menu.vue'
   import requestComponent from '@/components/request.vue'
-  
+  import { mapGetters } from 'vuex';
+
   export default {
     data() {
       return {
@@ -56,18 +54,11 @@
       requestComponent
     },
     computed: {
-      requests() {
-        if (this.$store.getters.user.admin)
-          return this.$store.getters.requestsAll
-        else
-          return this.$store.getters.requestsUser
-      },
-      isAdmin(){
-        return this.$store.getters.user.admin
-      },
-      loading() {
-        return this.$store.getters.loading
-      }
+      ...mapGetters([
+        'loading',
+        'requests',
+        'isAdmin'
+      ])
     }
   }
 </script>
@@ -78,8 +69,6 @@
     justify-content: center;
     align-items: center;
   }
-
-  $color-main: #3545a6;
 
   .content-wrapper {
     display: grid;
@@ -141,9 +130,10 @@
       width: 100%;
     }
 
-    &__tabs {      
+    &__tabs {
       border-bottom: 1px solid #ccc;
-      @media(max-width: 420px){
+
+      @media(max-width: 420px) {
         display: flex;
         flex-direction: column;
         align-items: center;
@@ -158,7 +148,7 @@
       padding: 10px 15px;
       margin-bottom: -1px;
       outline: none;
-      position: relative;      
+      position: relative;
 
       &--active {
         border-bottom: 3px solid #3f51b5;
@@ -173,7 +163,7 @@
 
   .requests-item {
     padding: 15px 10px;
-    border-bottom: 1px solid #ccc; 
+    border-bottom: 1px solid #ccc;
 
     &__number {
       color: #bbb;
@@ -184,9 +174,11 @@
       font-size: 16px;
     }
   }
-  .requests-comments{
+
+  .requests-comments {
     text-align: right;
-    &__message{
+
+    &__message {
       display: block;
       font-size: 14px;
       color: #333;
